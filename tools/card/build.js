@@ -16,9 +16,14 @@ module.exports.build = function (dir) {
   rimraf.sync(dist);
 
   fs.removeSync(out);
+  
+  if (!fs.existsSync(path.join(root, 'node_modules'))) {
+    console.log("Do npm install first");
+    util.spawn.sync("npm install", root, "fail to do npm install");
+  }
 
   //if ui5 cli does not exist, install it.
-  var ret = util.spawn.Advancedsync("which ui5", root, process.env);
+  /*var ret = util.spawn.Advancedsync("which ui5", root, process.env);
   if (ret.status) {
       var ui5path = path.join(__dirname, "..", "..", "..", "node_modules", ".bin", "ui5");
       console.log(ui5path);
@@ -29,14 +34,14 @@ module.exports.build = function (dir) {
       if (fs.existsSync(ui5path)) {
           process.env.PATH += ":"+path.dirname(ui5path);
       }
-  }
+  }*/
+  var ui5path = path.join(root, "node_modules", ".bin", "ui5");
+  console.log(ui5path);
+  if (fs.existsSync(ui5path)) {
+      process.env.PATH += ":"+path.dirname(ui5path);
+  } else console.log("@ui5/cli not found!");
 
   console.log(" - Create dist folder and content");
-
-  if (!fs.existsSync(path.join(root, 'node_modules'))) {
-    console.log("Do npm install first");
-    util.spawn.sync("npm install", root, "fail to do npm install");
-  }
   
   console.log(" - Run UI5 build: " + "ui5 build " + ui5BuildParams);
   util.spawn.sync("ui5 build " + ui5BuildParams, root, "UI5 build failed");
